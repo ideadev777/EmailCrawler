@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Mail Collector</title>
+
+  <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+  <link href="'https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+  <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+
+  <style type="text/css">
+    .bd-example-modal-lg .modal-dialog{
+        display: table;
+        position: relative;
+        margin: 0 auto;
+        top: calc(50% - 24px);
+      }
+    
+      .bd-example-modal-lg .modal-dialog .modal-content{
+        background-color: transparent;
+        border: none;
+     }
+   </style>
+
+</head>
+
+<body id="page-top">
+
+  <div id="wrapper">
+
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <div id="content">
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+          <div class="input-group">
+            <h3>Email Address &nbsp;</h3>
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" onclick="openModal()">
+                  <i class="fas fa-search fa-sm"></i>
+                </button>
+                &nbsp;
+                <!-- <button class="btn btn-primary" type="button" onclick="openModal()">
+                  <i class="fas fa-print fa-sm"></i>
+                </button> -->
+              </div>
+            </div>
+        </nav>
+        <!-- End of Topbar -->
+
+        <div class="container-fluid">
+
+          <h1 class="h3 mb-2 text-gray-800">Tables</h1>
+
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Result</h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Url</th>
+                      <th>Email Address</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for data in dataList %}
+                      <tr>
+                        <td><a href="{{data.url}}" target="_blank">{{data.url}}</a></td>
+                        <td>{{data.email}}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Mail Collector</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+  <div class="modal" id="myModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Input target Url</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+          <div class="form-group">
+            <textarea class="form-control" rows="10" id="urlList" name="urlList"></textarea>
+          </div>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" onclick="collect();">Collect</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade bd-example-modal-lg" id = "loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="width: 248px">
+          <div class="container">
+            <h2>Collecting...</h2>
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+
+
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+  <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+  <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'js/demo/datatables-demo.js' %}"></script>
+  <script>
+  function openModal()
+  {
+    $('#myModal').modal().show();
+  }
+  function collect()
+  {
+    var str = document.getElementById('urlList').value ;
+    const xml = new XMLHttpRequest();
+    $('#myModal').modal('hide');
+
+    let url = "/collect/";
+    console.log(url);
+    xml.open('POST', url, true);
+    xml.onreadystatechange  = function () {
+
+        if (this.readyState == 4 && this.status == 200) {
+            const data = JSON.parse(this.responseText);
+            location.href="/?url="+data['url']+"&mail="+data['mail'];
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/' ;
+            const urlField = document.createElement('input');
+            urlField.name = 'urlField';
+            urlField.value = data['url'];
+            form.appendChild(urlField);
+
+            const emailField = document.createElement('input');
+            emailField.name = 'emailField';
+            emailField.value = data['mail'];
+            form.appendChild(emailField);
+            var i = document.createElement("input");
+            i.setAttribute('name', 'csrfmiddlewaretoken');
+            i.setAttribute('value', '{{ csrf_token }}');
+            form.appendChild(i);
+            document.body.appendChild(form);
+            form.submit();
+            return ;
+        }
+    }
+    $('#loadingModal').modal('show');
+    var fd = new FormData();
+    fd.append("urlList",str ) ;
+    xml.send(fd) ;
+  }
+
+  </script>
+
+</body>
+
+</html>
