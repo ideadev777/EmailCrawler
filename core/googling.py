@@ -87,6 +87,8 @@ def RecursiveSearch( url, maxCnt, query ):
             break
     if url not in todoList:
         todoList.append(url)
+    maxOccur = 0
+    maxOccurUrl = url
     for url in todoList :
         try:
             print("start parse >>>>>>>" + url)
@@ -98,9 +100,14 @@ def RecursiveSearch( url, maxCnt, query ):
             emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", content)
 #            print(content)
             content = content.lower()
+            tot = 0
             for i in range(0,keyCount) :
-                print( query[i] + ' is ' + str(content.count(query[i].lower())) )
-                occurList[i] = occurList[i] + content.count(query[i].lower())
+                k = content.count(query[i].lower())
+                occurList[i] = occurList[i] + k
+                tot = tot + k
+            if tot > maxOccur :
+                maxOccur = tot
+                maxOccurUrl = url
             for email in emails :
                 if email in emailList:
                     continue
@@ -110,6 +117,7 @@ def RecursiveSearch( url, maxCnt, query ):
     ret = {
         "emailList" : emailList,
         "occurList" : occurList,
+        'maxOccurUrl' : maxOccurUrl,
         }
     print('##########END########')
     return ret

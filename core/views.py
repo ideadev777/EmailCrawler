@@ -28,12 +28,23 @@ class Index(generic.View):
         urlList = self.request.POST.get('urlField').split(',')
         emailList = self.request.POST.get('emailField').split(',')
         occurList = self.request.POST.get('occurField').split(',')
-        queryList = self.request.POST.get('queryField').split(',')
-        print('Occurlist = ')
-        print(occurList)
+        queryListTmp = self.request.POST.get('queryField').split(',')
+        queryList = []
+        for q in queryListTmp:
+            if len(q) :
+                queryList.append(q)
+        maxOccurUrlList = self.request.POST.get('maxUrlField').split(',')
         dataList = []
         num = len(urlList)
+        print(num)
         keywordCnt = len(queryList)
+        print(keywordCnt)
+        print("*****************************")
+        print(urlList)
+        print(emailList)
+        print(occurList)
+        print(queryList)
+        print(maxOccurUrlList)
         step = 0
         if num == len(emailList) :
             for i in range(0,num) :
@@ -45,10 +56,11 @@ class Index(generic.View):
                     continue
                 info = {'url':url,'email':emailList[i]}
                 occur = []
-                for i in range(step,step+keywordCnt):
-                    occur.append(occurList[i])
+                for j in range(step,step+keywordCnt):
+                    occur.append(occurList[j])
                 step = step + keywordCnt
                 info['occurList'] = occur
+                info['maxOccurUrl'] = maxOccurUrlList[i]
                 dataList.append(info)
         print(dataList)
         context = {
@@ -62,10 +74,15 @@ class Index(generic.View):
 def collect(request):
     urlList = str(request.POST['urlList']).splitlines()
 #    print('collect started:::: ' + urlList)
-    query = str(request.POST['keywords']).split(' ')
+    queryTmp = str(request.POST['keywords']).split(' ')
+    query = []
+    for q in queryTmp:
+        if len(q) :
+            query.append(q)
     queryCnt = len(query)
 #    print('keywords are ' +query)
     retUrlList = []
+    maxOccurUrlList = []
     retMailList = []
     dataList = []
     keywordList = []
@@ -90,6 +107,7 @@ def collect(request):
             for email in ret['emailList'] :
                 strEmail = strEmail + '    ' + email
             retMailList.append(strEmail)
+            maxOccurUrlList.append(ret['maxOccurUrl'])
             cnt = len(ret['occurList'])
             print('Count ' + str(cnt))
             if cnt != queryCnt:
@@ -106,5 +124,6 @@ def collect(request):
         'mail':retMailList,
         'occurList' : occurList,
         'query' : query,
+        'maxOccurUrlList' : maxOccurUrlList,
         }
     return Response(data,status=status.HTTP_200_OK)
