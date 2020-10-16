@@ -71,6 +71,9 @@
                   <thead>
                     <tr>
                       <th>Url</th>
+                      {% for q in query %}
+                      <th>{{q}}</th>
+                      {% endfor %}
                       <th>Email Address</th>
                     </tr>
                   </thead>
@@ -78,6 +81,9 @@
                     {% for data in dataList %}
                       <tr>
                         <td><a href="{{data.url}}" target="_blank">{{data.url}}</a></td>
+                        {% for occur in data.occurList %}
+                        <td>{{occur}}</td>
+                        {% endfor %}
                         <td>{{data.email}}</td>
                       </tr>
                     {% endfor %}
@@ -123,6 +129,12 @@
         <div class="modal-body">
           <div class="form-group">
             <textarea class="form-control" rows="10" id="urlList" name="urlList"></textarea>
+          </div>
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Keywords</span>
+            </div>
+            <input type="text" class="form-control" name="keywords" id = "keywords" >
           </div>
         </div>
         
@@ -189,6 +201,17 @@
             emailField.name = 'emailField';
             emailField.value = data['mail'];
             form.appendChild(emailField);
+
+            const occurField = document.createElement('input');
+            occurField.name = 'occurField';
+            occurField.value = data['occurList'];
+            form.appendChild(occurField);
+
+            const queryField = document.createElement('input');
+            queryField.name = 'queryField';
+            queryField.value = data['query'];
+            form.appendChild(queryField);
+
             var i = document.createElement("input");
             i.setAttribute('name', 'csrfmiddlewaretoken');
             i.setAttribute('value', '{{ csrf_token }}');
@@ -201,6 +224,7 @@
     $('#loadingModal').modal('show');
     var fd = new FormData();
     fd.append("urlList",str ) ;
+    fd.append("keywords",document.getElementById('keywords').value) ; 
     xml.send(fd) ;
   }
 

@@ -13,32 +13,7 @@ import ssl
 import re
 import urllib.request
 from django.views import generic
-
-
-# Create your views here.
-"""
-def index(request):
-    template = loader.get_template('index.html')
-    urlList = str(request.GET.get('url')).split(',')
-    mailList = str(request.GET.get('mail')).split(',')
-    dataList = []
-    num = len(urlList)
-    if num == len(mailList) :
-        for i in range(0,num) :
-            url = urlList[i]
-            if url == "None" :
-                continue
-            if len(url) == 0 : 
-                continue
-            print('Hi '+urlList[i])
-            info = {'url':url,'email':mailList[i]}
-            dataList.append(info)
-    print(len(dataList))
-    context = {
-        'dataList' : dataList,
-    }
-    
-"""
+from .googling import *
 
 class Index(generic.View):
     template = loader.get_template('index.html')
@@ -49,16 +24,17 @@ class Index(generic.View):
         return HttpResponse(self.template.render(context,self.request))
 #    @csrf_exempt
     def post(self,*args,**kwargs):
+        print(">>>>>>>>>>>>>>>>> Post <<<<<<<<<<<<<")
         urlList = self.request.POST.get('urlField').split(',')
-        print(urlList)
-        print('>>>>>>>>>>>>>>>>')
-        print(self.request.POST.get('emailField'))
         emailList = self.request.POST.get('emailField').split(',')
-#        emailList = re.split('[|]',self.request.POST.get('emailField'))
-        print(emailList)
+        occurList = self.request.POST.get('occurField').split(',')
+        queryList = self.request.POST.get('queryField').split(',')
+        print('Occurlist = ')
+        print(occurList)
         dataList = []
         num = len(urlList)
-        print(str(num)+' '+str(len(emailList)))
+        keywordCnt = len(queryList)
+        step = 0
         if num == len(emailList) :
             for i in range(0,num) :
                 url = urlList[i]
@@ -68,9 +44,15 @@ class Index(generic.View):
                 if len(url) == 0 :
                     continue
                 info = {'url':url,'email':emailList[i]}
+                occur = []
+                for i in range(step,step+keywordCnt):
+                    occur.append(occurList[i])
+                step = step + keywordCnt
+                info['occurList'] = occur
                 dataList.append(info)
         print(dataList)
         context = {
+            'query' : queryList,
             'dataList' : dataList,
         }
         return HttpResponse(self.template.render(context,self.request))
@@ -79,38 +61,50 @@ class Index(generic.View):
 @api_view(['POST'])
 def collect(request):
     urlList = str(request.POST['urlList']).splitlines()
+#    print('collect started:::: ' + urlList)
+    query = str(request.POST['keywords']).split(' ')
+    queryCnt = len(query)
+#    print('keywords are ' +query)
     retUrlList = []
     retMailList = []
     dataList = []
+    keywordList = []
+    for key in query :
+        if key in keywordList:
+            continue
+        if len(key) < 3 :
+            continue
+        keywordList.append(key)
+    print(keywordList)
+    occurList = []
     for url in urlList :
         if len(url) == 0 :
             continue
         url = url.replace(' ','')
         retUrlList.append(url)
         try:
-#            retMailList.append("ret")
-#            continue
-
-            print(url)
-            r = urllib.request.Request(url, headers= {'User-Agent' : 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'})
-            html = urllib.request.urlopen(r)
-            soup = BeautifulSoup(html, 'html.parser')
-            emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", str(soup))
-            print(emails)
+            print("Bot on ::::::::::::: " + url)
+            ret = RecursiveSearch( url, 3, keywordList )
+            print(ret['emailList'])
             strEmail = ""
-            mySet = []
-            for email in emails :
-                if email in mySet :
-                    continue
-                mySet.append(email)
+            for email in ret['emailList'] :
                 strEmail = strEmail + '    ' + email
             retMailList.append(strEmail)
-#            retMailList.append(str(emails))
+            cnt = len(ret['occurList'])
+            print('Count ' + str(cnt))
+            if cnt != queryCnt:
+                for i in range(1,queryCnt+1) :
+                    occurList.append(0)
+            else:
+                for occur in ret['occurList'] :
+                    occurList.append(occur)
         except:
             retMailList.append(" ")
             pass            
     data = {
         'url':retUrlList,
         'mail':retMailList,
+        'occurList' : occurList,
+        'query' : query,
         }
     return Response(data,status=status.HTTP_200_OK)
