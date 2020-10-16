@@ -63,7 +63,7 @@
 
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">Result</h6>
+              <h5 class="m-0 font-weight-bold text-primary">Result</h5>
             </div>
             <div class="card-body">
               <div class="table-responsive">
@@ -75,22 +75,22 @@
                         <th>{{q}}</th>
                       {% endfor %}
                       {% if query|length %}
-                      <th>Most frequently mentioned Url</th>                      
+                      <th>KeyWord Top Result</th>                      
                       {% endif %}
-                      <th>URL Search</th>
+                      <th>Email Address</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for data in dataList %}
                       <tr>
-                        <td><a href="{{data.url}}" target="_blank">{{data.url}}</a></td>
+                        <td><a href="{{data.url}}" target="_blank"><p style="font-size:120%;">{{data.url}}</p></a></td>
                         {% for occur in data.occurList %}
-                        <td>{{occur}}</td>
+                        <td><p style="font-size:120%;">{{occur}}</p></td>
                         {% endfor %}
                         {% if query|length %}
-                        <td><a href="{{data.maxOccurUrl}}" target="_blank" >{{data.maxOccurUrl}}</a></td>
+                        <td><a href="{{data.maxOccurUrl}}" target="_blank" ><p style="font-size:120%;">{{data.maxOccurUrl}}</p></a></td>
                         {% endif %}
-                        <td>{{data.email}}</td>
+                        <td><p style="font-size:120%;">{{data.email}}</p></td>
                       </tr>
                     {% endfor %}
                   </tbody>
@@ -107,7 +107,7 @@
       <footer class="sticky-footer bg-white">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright &copy; Mail Collector</span>
+            <span>Copyright &copy; Silver's Email Collector and Search Engine</span>
           </div>
         </div>
       </footer>
