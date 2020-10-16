@@ -84,7 +84,7 @@ def collect(request):
         retUrlList.append(url)
         try:
             print("Bot on ::::::::::::: " + url)
-            ret = RecursiveSearch( url, 3, keywordList )
+            ret = RecursiveSearch( url, 10, keywordList )
             print(ret['emailList'])
             strEmail = ""
             for email in ret['emailList'] :
