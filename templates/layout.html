@@ -141,6 +141,16 @@
               <span class="input-group-text">Keywords</span>
             </div>
             <input type="text" class="form-control" name="keywords" id = "keywords" >
+            <div class="input-group-prepend">
+              <span class="input-group-text">Pages on each URL</span>
+            </div>
+            <input type="number" class="form-control col-md-1" name="pagecount" id = "pagecount" value=10 min=1>
+            <div class="input-group-prepend">
+              <span class="input-group-text">Collect Email Address</span>
+            </div>
+            <div class="input-group-text">
+              <input type="checkbox" name="collectemail" id="collectemail" checked>
+            </div>
           </div>
         </div>
         
@@ -184,6 +194,12 @@
   function collect()
   {
     var str = document.getElementById('urlList').value ;
+    var pageCount = document.getElementById('pagecount').value ;
+    if( pageCount < 1 )
+    {
+      alert("Invalid page count") ;
+      return ;
+    }
     const xml = new XMLHttpRequest();
     $('#myModal').modal('hide');
 
@@ -236,6 +252,8 @@
     var fd = new FormData();
     fd.append("urlList",str ) ;
     fd.append("keywords",document.getElementById('keywords').value) ; 
+    fd.append("collectemail", document.getElementById('collectemail').checked) ;
+    fd.append("pagecount",pageCount) ; 
     xml.send(fd) ;
   }
 

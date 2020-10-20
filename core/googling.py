@@ -63,7 +63,7 @@ def crawl(url, max_urls=5):
             break
         crawl(link, max_urls=max_urls)
 
-def RecursiveSearch( url, maxCnt, query ):
+def RecursiveSearch( url, maxCnt, query, collectMail ):
     global total_urls_visited
     global max_internal_urls
     total_urls_visited = 0
@@ -97,7 +97,9 @@ def RecursiveSearch( url, maxCnt, query ):
             soup = BeautifulSoup(html, 'html.parser')
             content = soup.get_text()
             content.replace('\n','')
-            emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", content)
+            emails = []
+            if collectMail == True :
+                emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", content)
 #            print(content)
             content = content.lower()
             tot = 0

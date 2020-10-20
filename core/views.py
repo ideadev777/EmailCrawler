@@ -75,6 +75,11 @@ def collect(request):
     urlList = str(request.POST['urlList']).splitlines()
 #    print('collect started:::: ' + urlList)
     queryTmp = str(request.POST['keywords']).split(' ')
+    maxPageCount = int(request.POST['pagecount'])
+    collectMail = False
+    print(str(request.POST['collectemail']))
+    if str(request.POST['collectemail']) == "true" :
+        collectMail = True
     query = []
     for q in queryTmp:
         if len(q) :
@@ -101,7 +106,7 @@ def collect(request):
         retUrlList.append(url)
         try:
             print("Bot on ::::::::::::: " + url)
-            ret = RecursiveSearch( url, 10, keywordList )
+            ret = RecursiveSearch( url, maxPageCount, keywordList,collectMail )
             print(ret['emailList'])
             strEmail = ""
             for email in ret['emailList'] :
